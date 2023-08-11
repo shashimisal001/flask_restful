@@ -1,6 +1,8 @@
 import sys
+from flask import request
 from flask_restful import Resource
 from rest_apis.modules.models.user_model import UserModel
+from rest_apis.modules.Helpers.response_helper import ResponseHelper
 
 
 class Users(Resource):
@@ -9,18 +11,38 @@ class Users(Resource):
 
 
     def get(self):
-        return {'data': self.user_model.get_all(), 'status': 'success'}, 200
+        try:
+            result = self.user_model.get_all()
+            return ResponseHelper().success_response({'data': result})
+        except Exception as e:
+            return ResponseHelper().error_response({'msg': str(e)})
+
 
     def post(self):
-        return {"data": "User added", "status": "success"}, 200
+        try:
+            data = request.get_json()
+            self.user_model.add_user(data['user'])
+            return ResponseHelper().success_response({'msg': 'User added successfully'})
+        except Exception as e:
+            return ResponseHelper().error_response({'msg': str(e)})
 
     def put(self):
-        return {"data": "User completely updated", "status": "success"}, 200
+        try:
+            data = request.get_json()
+            self.user_model.update_user(data['user']['id'], data['user'])
+            return ResponseHelper().success_response({'msg': 'User updated successfully'})
+        except Exception as e:
+            return ResponseHelper().error_response({'msg': str(e)})
 
     def patch(self):
-        return {"data": "User partially updated", "status": "success"}, 200
+        return self.put()
 
     def delete(self):
-        return {"data": "User deleted", "status": "success"}, 200
+        try:
+            data = request.get_json()
+            self.user_model.delete_user(str(data['id']))
+            return ResponseHelper().success_response({'msg': 'User deleted successfully'})
+        except Exception as e:
+            return ResponseHelper().error_response({'msg': str(e)})
 
     
